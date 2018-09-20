@@ -49,7 +49,7 @@ namespace sh {
 // See EvalSH(int, int, double, double) for a description of these terms.
 typedef std::function<double(double, double)> SphericalFunction;
 
-const int kDefaultSampleCount = 10000;
+const int kDefaultSampleCount = 50000;
 
 // Get the total number of coefficients for a function represented by
 // all spherical harmonic basis of degree <= @order (it is a point of
