@@ -666,6 +666,19 @@ std::unique_ptr<std::vector<double>> ProjectFunction(
   return coeffs;
 }
 
+
+namespace {
+	float hanning(int l, int w)
+	{
+		return (std::cos(M_PI * double(l) / double(w)) + 1) * 0.5;
+	}
+
+	float lanczos(int l, int w)
+	{
+		return std::sin(M_PI * double(l) / double(w)) / (M_PI * double(l) / double(w));
+	}
+}
+
 std::unique_ptr<std::vector<Eigen::Array3f>> ProjectEnvironment(
     int order, const Image& env) {
   CHECK(order >= 0, "Order must be at least zero.");
@@ -695,7 +708,8 @@ std::unique_ptr<std::vector<Eigen::Array3f>> ProjectEnvironment(
         for (int m = -l; m <= l; m++) {
           int i = GetIndex(l, m);
           double sh = EvalSH(l, m, phi, theta);
-          (*coeffs)[i] += sh * weight * color.array();
+		  auto filter_mult = hanning(l, order*order);
+          (*coeffs)[i] += filter_mult * sh * weight * color.array();
         }
       }
     }
