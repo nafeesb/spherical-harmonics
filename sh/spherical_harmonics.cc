@@ -929,6 +929,98 @@ void RenderDiffuseIrradianceMap(const std::vector<Eigen::Array3f>& sh_coeffs,
   }
 }
 
+namespace {
+
+#if 0
+	surface float3 irradcoeffs(
+		float3 L00, float3 L1_1, float3 L10, float3 L11,
+		float3 L2_2, float3 L2_1, float3 L20, float3 L21, float3 L22,
+		float3 n)
+	{
+		//------------------------------------------------------------------
+		// These are variables to hold x,y,z and squares and products
+
+		float1 x2;
+		float1  y2;
+		float1 z2;
+		float1 xy;
+		float1  yz;
+		float1  xz;
+		float1 x;
+		float1 y;
+		float1 z;
+		float3 col;
+		//------------------------------------------------------------------       
+		// We now define the constants and assign values to x,y, and z 
+
+		constant float1 c1 = 0.429043;
+		constant float1 c2 = 0.511664;
+		constant float1 c3 = 0.743125;
+		constant float1 c4 = 0.886227;
+		constant float1 c5 = 0.247708;
+		x = n[0]; y = n[1]; z = n[2];
+		//------------------------------------------------------------------ 
+		// We now compute the squares and products needed 
+
+		x2 = x * x; y2 = y * y; z2 = z * z;
+		xy = x * y; yz = y * z; xz = x * z;
+		//------------------------------------------------------------------ 
+		// Finally, we compute equation 13
+
+		col = c1 * L22*(x2 - y2) + c3 * L20*z2 + c4 * L00 - c5 * L20
+			+ 2 * c1*(L2_2*xy + L21 * xz + L2_1 * yz)
+			+ 2 * c2*(L11*x + L1_1 * y + L10 * z);
+
+		return col;
+	}
+#endif
+
+	Eigen::Array3f diffuseIrradiance(const std::vector<Eigen::Array3f>& coeffs,
+		const Eigen::Vector3d& n)
+	{
+		float x2;
+		float  y2;
+		float z2;
+		float xy;
+		float  yz;
+		float  xz;
+		float x;
+		float y;
+		float z;
+		//------------------------------------------------------------------       
+		// We now define the constants and assign values to x,y, and z 
+
+		const float c1 = 0.429043;
+		const float c2 = 0.511664;
+		const float c3 = 0.743125;
+		const float c4 = 0.886227;
+		const float c5 = 0.247708;
+		x = n[0]; y = n[1]; z = n[2];
+		//------------------------------------------------------------------ 
+		// We now compute the squares and products needed 
+
+		x2 = x * x; y2 = y * y; z2 = z * z;
+		xy = x * y; yz = y * z; xz = x * z;
+
+		using vec3 = Eigen::Array3f;
+		auto L22 = coeffs[GetIndex(2, 2)];
+		auto L20 = coeffs[GetIndex(2, 0)];
+		auto L00 = coeffs[GetIndex(0, 0)];
+		auto L2_2 = coeffs[GetIndex(2, -2)];
+		auto L21 = coeffs[GetIndex(2, 1)];
+		auto L2_1 = coeffs[GetIndex(2, -1)];
+		auto L11 = coeffs[GetIndex(1, 1)];
+		auto L1_1 = coeffs[GetIndex(1, -1)];
+		auto L10 = coeffs[GetIndex(1, 0)];
+
+		auto irr = c1 * L22*(x2 - y2) + c3 * L20*z2 + c4 * L00 - c5 * L20
+			+ 2 * c1*(L2_2*xy + L21 * xz + L2_1 * yz)
+			+ 2 * c2*(L11*x + L1_1 * y + L10 * z);
+
+		return irr;
+	}
+}
+
 Eigen::Array3f RenderDiffuseIrradiance(
     const std::vector<Eigen::Array3f>& sh_coeffs,
     const Eigen::Vector3d& normal) {
@@ -937,6 +1029,8 @@ Eigen::Array3f RenderDiffuseIrradiance(
   if (sh_coeffs.empty()) {
     return Eigen::Array3f(0.0, 0.0, 0.0);
   }
+
+  //return diffuseIrradiance(sh_coeffs, normal);
 
   // Compute diffuse irradiance
   Eigen::Quaterniond rotation;
