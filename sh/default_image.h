@@ -22,7 +22,7 @@ namespace sh {
 
 class DefaultImage : public Image {
  public:
-  DefaultImage(int width, int height);
+  DefaultImage(int width, int height, float _maxval=1.0e3f);
   
   int width() const override;
   int height() const override;
@@ -33,6 +33,7 @@ class DefaultImage : public Image {
  private:
   const int width_;
   const int height_;
+  const float maxval_;
 
   std::unique_ptr<Eigen::Array3f[]> pixels_;
 };

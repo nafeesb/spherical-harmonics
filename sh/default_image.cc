@@ -16,7 +16,7 @@
 
 namespace sh {
 
-DefaultImage::DefaultImage(int width, int height) : width_(width), height_(height) {
+DefaultImage::DefaultImage(int width, int height, float _maxval) : width_(width), height_(height), maxval_(_maxval) {
   pixels_.reset(new Eigen::Array3f[width * height]);
 }
 
@@ -26,7 +26,10 @@ int DefaultImage::height() const { return height_; }
 
 Eigen::Array3f DefaultImage::GetPixel(int x, int y) const {
   int index = x + y * width_;
-  return pixels_[index];
+  // spring 1000
+  // summer 100000
+  Eigen::Array3f Cd = pixels_[index].min(maxval_);
+  return Cd;
 }
 
 void DefaultImage::SetPixel(int x, int y, const Eigen::Array3f& v) {

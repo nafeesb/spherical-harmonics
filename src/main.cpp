@@ -13,7 +13,7 @@
 #define STBI_MSC_SECURE_CRT
 #include "stb_image_write.h"
 
-#include "sh/default_image.h"
+#include <sh/default_image.h>
 #include "sh/spherical_harmonics.h"
 using namespace std;
 
@@ -22,19 +22,25 @@ main(int argc, char** argv)
 {
 	string fname;
 	string outname;
+	float maxcolor = 1e3f;
 	if (argc < 3) {
-		fname = "d:/src/ddna/rsc/envmaps/fall.hdr";
-		outname = "irradiance_map.hdr";
+		cout << "Usage: " << argv[0] << " envmap.hdr irradiance_map.hdr" << endl;
+		return 0;
 	}
 	else {
 		fname = string(argv[1]);
 		outname = string(argv[2]);
+
+		if (argc > 3) {
+			maxcolor = atof(argv[3]);
+		}
 	}
 
 	int W, H, N;
 	float* data = stbi_loadf(fname.c_str(), &W, &H, &N, 0);
 
 	cout << "width: " << W << ", height: " << H << " comps: " << N << endl;
+	cout << "Clamping max value to: " << maxcolor << endl;
 
 	/*
 	for (int i = 0; i < W*H*N; ++i)
@@ -44,7 +50,7 @@ main(int argc, char** argv)
 	*/
 
 	// convert to DefaultImage
-	sh::DefaultImage img(W, H);
+	sh::DefaultImage img(W, H, maxcolor);
 	size_t offset = 0;
 	for (int y = 0; y < H; ++y)
 		for (int x = 0; x < W; ++x) {
